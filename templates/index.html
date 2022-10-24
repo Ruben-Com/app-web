@@ -4,10 +4,19 @@
  <title>home</title>  
  </head>  
  <body>
- <h1> El valor del euro es:  {{ value }} </h1>
- <h3>Welcome to the website</h3>  
- <a href = "/login">login</a><br>  
- <a href = "/profile">view profile</a><br>  
- <a href = "/logout">Log out</a><br>  
+ 	<div style="text-align:center; width:100%">
+ 		<h1> El valor del euro es:  {{ value }} </h1>
+ 		<h3>Bienvenido a la web</h3>  
+
+ 		<a href = "/login">Entrada</a><br>  
+ 		<a href = "/profile">Ver perfil</a><br>  
+ 		<a href = "/logout">Salida</a><br>  
+
+  	<form method = "POST" action = "./media">  
+    	<button name="base" value = "local">Media con DB local</button>
+    	<button name="base" value = "remota">Media con DB remota</button>
+	 	</form>  
+
+ </div>
  </body>  
  </html> 
