@@ -1,8 +1,13 @@
-import requests, re, pymongo, time, datetime, hashlib
+import requests, re, pymongo, time, datetime, hashlib, http.client, random, urllib.parse
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, render_template, request, redirect, url_for, session
+
 app = Flask(__name__)
 app.secret_key = "ayush"  
+api_key = "19b609d0-19c2-3844-b7c7-f88cee74648d"
+component_id = "eur-usd"
+base_url = '/api/feed?'
+conn = http.client.HTTPConnection('www.grovestreams.com')
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["servidor"]
@@ -14,6 +19,13 @@ def recoger_valor():
     valor = float((str(re.findall("pid-1-last..(\d,\d{4})", r.text))[2:-2]).replace(",", "."))
     mydict = {"value": valor, "time": datetime.datetime.now()}
     x = mycol_val.insert_one(mydict)
+
+    now = datetime.datetime.now()
+    sample_time = int(time.mktime(now.timetuple()))*1000
+    url = base_url + urllib.parse.urlencode({'compId': 'eur-usd', 'value': valor, 'time': sample_time})
+    headers = {"Connection": "close", "Content-type": "application/json", "Cookie":"api_key="+api_key}
+    conn.request("PUT", url, "", headers)
+    conn.close()
     
 sched = BackgroundScheduler(daemon=True)
 sched.add_job(recoger_valor, 'interval', minutes=2)
