@@ -1,4 +1,4 @@
-import requests, re, pymongo, time, datetime, hashlib, http.client, random, urllib.parse
+import requests, re, pymongo, time, datetime, hashlib, http.client, random, urllib.parse, json
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, render_template, request, redirect, url_for, session
 
@@ -25,6 +25,7 @@ def recoger_valor():
     url = base_url + urllib.parse.urlencode({'compId': 'eur-usd', 'value': valor, 'time': sample_time})
     headers = {"Connection": "close", "Content-type": "application/json", "Cookie":"api_key="+api_key}
     conn.request("PUT", url, "", headers)
+    response = conn.getresponse()
     conn.close()
     
 sched = BackgroundScheduler(daemon=True)
@@ -35,8 +36,6 @@ sched.start()
 def index():
     r = requests.get("http://es.investing.com/currencies/")
     valor = float((str(re.findall("pid-1-last..(\d,\d{4})", r.text))[2:-2]).replace(",", "."))
-    mydict = {"value": valor, "time": datetime.datetime.now()}
-    x = mycol_val.insert_one(mydict)
     if 'username' in session and 'email' in session:  
         return render_template('index_log.html', value=valor, usuario=("Sesión con el usuario: "+session['username']))
     else:
@@ -122,6 +121,21 @@ def media():
         cuenta=0
         for valores in mycol_val.find({},{"_id": 0, "time": 0}):
             suma=suma+float(valores["value"])
+            cuenta=cuenta+1
+    if base=='remota':
+        for x in mycol_usr.find({"email": session['email'], "username": session['username']}):
+            num = x["remote_mean"]
+        num=num+1
+        mycol_usr.update_one({"email": session['email'], "username": session['username']},{"$set":{"remote_mean": num}})
+        url = "/api/comp/eur-usd/feed?"
+        headers = {"Connection": "close", "Content-type": "application/json", "Cookie":"api_key="+api_key}
+        conn.request("GET", url, "", headers)
+        response = conn.getresponse()
+        conn.close()
+        suma=0
+        cuenta=0
+        for valores in json.loads(str(response.read().decode(encoding='UTF-8'))):
+            suma=suma+float(valores["data"])
             cuenta=cuenta+1
     return render_template('media.html', base=base, media=round((suma/cuenta), 4) )
 
