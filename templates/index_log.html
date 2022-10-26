@@ -1,0 +1,27 @@
+
+<html>  
+ <head>  
+ <title>Inicio</title>  
+ </head>  
+ <body>
+ 	<div style="text-align:center; width:100%">
+ 		<h1> El valor del euro es:  {{ value }} </h1>
+ 		<h3>Bienvenido a la web</h3>  
+
+ 		<a href = "/profile">Ver perfil</a><br>  
+ 		<a href = "/logout">Cerrar sesión</a><br>  
+
+		<br><br>
+
+  	<form method = "POST" action = "./media">  
+    	<button name="base" value = "local">Media con DB local</button>
+    	<button name="base" value = "remota">Media con DB remota</button>
+	 	</form>  
+
+		<br><br>
+
+		<h4>{{ usuario }}</h4>
+
+ </div>
+ </body>  
+ </html> 
