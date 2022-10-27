@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 app = Flask(__name__)
 app.secret_key = "ayush"  
 api_key = "19b609d0-19c2-3844-b7c7-f88cee74648d"
+api_key_dash = "695ae44b-9cd8-3cde-8d19-fc2cb2937a5c"
 component_id = "eur-usd"
 base_url = '/api/feed?'
 conn = http.client.HTTPConnection('www.grovestreams.com')
@@ -87,7 +88,6 @@ def login():
                     name = x["username"]
                 session['username']=name  
                 return render_template('success.html', usuario=name)
-            
 
 @app.route("/logout")
 def logout():
@@ -138,6 +138,10 @@ def media():
             suma=suma+float(valores["data"])
             cuenta=cuenta+1
     return render_template('media.html', base=base, media=round((suma/cuenta), 4) )
+
+@app.route("/graphic")
+def graphic():
+    return render_template('graphic.html')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
