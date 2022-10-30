@@ -143,5 +143,20 @@ def media():
 def graphic():
     return render_template('graphic.html')
 
+@app.route("/umbral", methods=["GET", "POST"])
+def umbral():
+    if request.method == "POST":
+        umbral = request.form.get('umbral')
+        i=0
+        val=['']*5
+        for x in mycol_val.find({"value":{ "$gt": float(umbral)}}, {"_id": 0}).sort("time", -1).limit(5):
+            val[i]=x
+            i=i+1
+        text1 = "Se superó ese umbral con el valor "
+        text2 = " en la fecha "
+        return render_template('umbral.html', text1=text1, text2=text2, valor1=str(val[0]["value"]), valor2=str(val[1]["value"]), valor3=str(val[2]["value"]), valor4=str(val[3]["value"]), valor5=str(val[4]["value"]), time1=str(val[0]["time"]), time2=str(val[1]["time"]), time3=str(val[2]["time"]), time4=str(val[3]["time"]), time5=str(val[4]["time"]))
+    if request.method == "GET":
+        return render_template('umbral.html')
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
