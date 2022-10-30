@@ -15,6 +15,7 @@ mydb = myclient["servidor"]
 mycol_val = mydb["euro"]
 mycol_usr = mydb["users"]
 
+#función para recoger y almacenar el valor del euro/usd junto a la hora a la que se obtiene ese dato
 def recoger_valor():
     r = requests.get("http://es.investing.com/currencies/")
     valor = float((str(re.findall("pid-1-last..(\d,\d{4})", r.text))[2:-2]).replace(",", "."))
@@ -33,6 +34,7 @@ sched = BackgroundScheduler(daemon=True)
 sched.add_job(recoger_valor, 'interval', minutes=2)
 sched.start()
 
+#función para recoger el valor del euro respecto al dólar y enviarlo junto a la página web
 @app.route("/")
 def index():
     r = requests.get("http://es.investing.com/currencies/")
@@ -42,6 +44,7 @@ def index():
     else:
         return render_template('index_not_log.html', value=valor)
 
+#función para registrar nuevos usuarios e iniciar sesión una vez creados
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
@@ -65,6 +68,7 @@ def register():
             mensaje="Ya existe un usuario con el email utilizado"
             return render_template('register.html', mensaje=mensaje)
 
+#función para iniciar sesión
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if 'username' in session and 'email' in session:  
@@ -89,6 +93,7 @@ def login():
                 session['username']=name  
                 return render_template('success.html', usuario=name)
 
+#función para cerrar sesión
 @app.route("/logout")
 def logout():
     if 'username' in session and 'email' in session:  
@@ -98,6 +103,7 @@ def logout():
     else:  
         return render_template('logout.html', sesion="No había sesión iniciada")
 
+#función para comprobar el perfil de un usuario
 @app.route("/profile")
 def profile():
     for x in mycol_usr.find({"email": session['email'], "username": session['username']}):
@@ -105,10 +111,12 @@ def profile():
         remote = x["remote_mean"]
     return render_template('profile.html', email=session['email'], local_mean=local, remote_mean=remote)
 
+#función para enviar la página de éxito al iniciar sesión correctamente
 @app.route("/success", methods=['GET', 'POST'])
 def success():
     return render_template('success.html')
 
+#función para mostrar la media local o remota, según se haya solicitado
 @app.route("/media", methods=['POST'])
 def media():
     base = request.form.get('base')
@@ -139,10 +147,12 @@ def media():
             cuenta=cuenta+1
     return render_template('media.html', base=base, media=round((suma/cuenta), 4) )
 
+#función para mostrar el dashboard mostrado creado por GroveStreams
 @app.route("/graphic")
 def graphic():
     return render_template('graphic.html')
 
+#función para mostrar los 5 últimos valores que superan el umbral especificado
 @app.route("/umbral", methods=["GET", "POST"])
 def umbral():
     if request.method == "POST":
